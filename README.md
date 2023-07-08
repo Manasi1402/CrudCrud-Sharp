@@ -1,4 +1,3 @@
-#SRPD18 - Deleting the Appointments
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +30,7 @@
                 email: email,
                 phonenumber: phonenumber
             };
-            axios.post("https://crudcrud.com/api/727255c9705f493cb18ca23d90fbf838/appoinmentData", userDetails)
+            axios.post("https://crudcrud.com/api/bd67eeb626ff47e7add1762357035248/appoinmentData", userDetails)
                 .then((response) => {
                     showNewUserOnScreen(response.Data)
                         console.log(response)
@@ -81,14 +80,14 @@
             const editButton = document.createElement('button');
             editButton.textContent = 'Edit';
             editButton.addEventListener('click', function() {
-                editUser(user._id);
+                editUser(user.email);
             });
             listItem.appendChild(deleteButton);
             listItem.appendChild(editButton);
             parentElement.appendChild(listItem);
         }
         function deleteUser(userId) {
-            axios.delete(`https://crudcrud.com/api/727255c9705f493cb18ca23d90fbf838/appoinmentData/${userId}`)
+            axios.delete(`https://crudcrud.com/api/bd67eeb626ff47e7add1762357035248/appoinmentData/${userId}`)
                 .then((response) => {
                     removeUserFromScreen(userId)
                 })
@@ -107,18 +106,18 @@
         }
         function editUser(userId) {
             isEditing = true;
-            editEmail = _id;
+            editEmail = email;
             const storedUser = JSON.parse(localStorage.getItem());
             if (storedUser) {
                 const form = document.querySelector('form');
                 form.username.value = storedUser.name;
-                form.emailId.value = storedUser._id;
+                form.emailId.value = storedUser.email;
                 form.phonenumber.value = storedUser.phonenumber;
             }
         }
         // Load existing users from local storage and display them on the UI
         window.addEventListener('DOMContentLoaded', function() {
-            axios.get("https://crudcrud.com/api/727255c9705f493cb18ca23d90fbf838/appoinmentData")
+            axios.get("https://crudcrud.com/api/bd67eeb626ff47e7add1762357035248/appoinmentData")
                 .then((response) => {
                         console.log(response)
                         for(var i=0; i< response.data.length; i++) {
