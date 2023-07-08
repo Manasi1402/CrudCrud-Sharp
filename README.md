@@ -1,1 +1,120 @@
-# CrudCrud-Sharp
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form onsubmit="saveToLocalStorage(event)">
+        <label>Name</label>
+        <input type="text" name="username" required/>
+        <label>EmailId</label>
+        <input type="email" name="emailId" required/>
+        <label>Phonenumber</label> 
+        <input type="tel" name="phonenumber" />
+        <button>Submit</button>
+    </form>
+    <ul id="listofitems"></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+        let isEditing = false;
+        let editEmail = '';
+     function saveToLocalStorage(event) {
+            event.preventDefault();
+            const name = event.target.username.value;
+            const email = event.target.emailId.value;
+            const phonenumber = event.target.phonenumber.value;
+            const userDetails = {
+                name: name,
+                email: email,
+                phonenumber: phonenumber,
+            };
+        axios.post("https://crudcrud.com/api/a4090ec5b8c44a348f4ff888f40d2ca2/appoinmentData", userDetails)
+                .then((response) => {
+                    showUserOnScreen(response.Data)
+                        //console.log(response)
+                    })
+                    .catch((err) => {
+                        document.body.innerHTML = document.body.innerHTML + "<h4> something went wrong </h4>"
+                        console.log(err)
+                    })
+            if (isEditing) {
+                updateUserData(email, userDetails);
+                isEditing = false;
+                editEmail = '';
+            } else {
+                addUserData(userDetails);
+            }
+          event.target.reset();
+        }
+      function addUserData(userDetails) {
+            const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+            storedUsers.push(userDetails);
+            localStorage.setItem('users', JSON.stringify(storedUsers));
+            localStorage.setItem(userDetails.email, JSON.stringify(userDetails));
+            showUserOnScreen(userDetails);
+        }
+      function updateUserData(email, userDetails) {
+            const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+            const updatedUsers = storedUsers.map(user => {
+                if (user.email === email) {
+                    return userDetails;
+                }
+                return user;
+            });
+            localStorage.setItem('users', JSON.stringify(updatedUsers));
+            localStorage.setItem(userDetails.email, JSON.stringify(userDetails));
+            updateUserOnUI(email, userDetails);
+        }
+        function showUserOnScreen(user) {
+            const parentElement = document.getElementById('listofitems');
+            const listItem = document.createElement('li');
+            listItem.setAttribute('data-email', user.email);
+            listItem.textContent = user.name + ' - ' + user.email + ' - ' + user.phonenumber;
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', function() {
+                deleteUser(user.email);
+            });
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.addEventListener('click', function() {
+                editUser(user.email);
+            });
+            listItem.appendChild(deleteButton);
+            listItem.appendChild(editButton);
+            parentElement.appendChild(listItem);
+        }
+    function deleteUser(email) {
+            const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+            const updatedUsers = storedUsers.filter(user => user.email !== email);
+            localStorage.setItem('users', JSON.stringify(updatedUsers));
+            localStorage.removeItem(email);
+            removeUserFromUI(email);
+        }
+    function removeUserFromUI(email) {
+            const listItem = document.querySelector(`li[data-email="${email}"]`);
+            listItem.remove();
+        }
+     function editUser(email) {
+            isEditing = true;
+            editEmail = email;
+            const storedUser = JSON.parse(localStorage.getItem(email));
+            if (storedUser) {
+                const form = document.querySelector('form');
+                form.username.value = storedUser.name;
+                form.emailId.value = storedUser.email;
+                form.phonenumber.value = storedUser.phonenumber;
+                }
+        }
+        // Load existing users from local storage and display them on the UI
+        window.addEventListener('DOMContentLoaded', function() {
+            const storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+            storedUsers.forEach(function(user) {
+                showUserOnScreen(user);
+            });
+        });
+    </script>
+</body>
+</html>
